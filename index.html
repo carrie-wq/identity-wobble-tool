@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Identity Wobble™ Mapping Tool | Carrie Brito</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap');
+
+  :root {
+    --cream: #F6F2EC;
+    --orange: #EA5E27;
+    --pink: #EE4D79;
+    --charcoal: #1F1F1F;
+    --warm-gray: #7C7366;
+    --light-gray: #E8E3DC;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--cream);
+    color: var(--charcoal);
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---- HEADER ---- */
+  .header {
+    background: var(--charcoal);
+    padding: 48px 40px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: var(--orange);
+    opacity: 0.12;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: var(--pink);
+    opacity: 0.10;
+  }
+  .header-label {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 20px;
+  }
+  .header h1 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    font-size: clamp(32px, 5vw, 52px);
+    color: var(--cream);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .header h1 em {
+    font-style: italic;
+    color: var(--orange);
+  }
+  .header-sub {
+    font-size: 13px;
+    color: var(--warm-gray);
+    letter-spacing: 0.5px;
+    line-height: 1.7;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* ---- PROGRESS ---- */
+  .progress-bar-wrap {
+    background: var(--charcoal);
+    padding: 0 40px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .progress-track {
+    flex: 1;
+    height: 2px;
+    background: rgba(246,242,236,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--orange);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+  .progress-label {
+    font-size: 11px;
+    color: var(--warm-gray);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  /* ---- CONTAINER ---- */
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ---- SCREENS ---- */
+  .screen { display: none; padding: 56px 0 80px; }
+  .screen.active { display: block; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ---- SECTION LABEL ---- */
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 12px;
+    font-weight: 400;
+  }
+
+  /* ---- QUESTION ---- */
+  .question-title {
+    font-family: 'Roboto', sans-serif;
+    font-size: clamp(22px, 3.5vw, 32px);
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--charcoal);
+    margin-bottom: 8px;
+  }
+  .question-sub {
+    font-size: 13px;
+    color: var(--warm-gray);
+    line-height: 1.8;
+    margin-bottom: 36px;
+  }
+
+  /* ---- OPTIONS ---- */
+  .options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+  .option {
+    border: 1px solid var(--light-gray);
+    background: white;
+    padding: 20px 24px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .option::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--orange);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+  }
+  .option:hover { border-color: var(--orange); transform: translateX(4px); }
+  .option:hover::before { transform: scaleY(1); }
+  .option.selected {
+    border-color: var(--orange);
+    background: #FFF8F4;
+    transform: translateX(4px);
+  }
+  .option.selected::before { transform: scaleY(1); }
+  .option-letter {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--warm-gray);
+    margin-bottom: 4px;
+    display: block;
+  }
+  .option-text {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--charcoal);
+  }
+
+  /* ---- TEXTAREA ---- */
+  .text-input {
+    width: 100%;
+    border: 1px solid var(--light-gray);
+    background: white;
+    padding: 20px 24px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--charcoal);
+    resize: none;
+    border-radius: 2px;
+    outline: none;
+    line-height: 1.7;
+    transition: border-color 0.2s;
+    min-height: 140px;
+    margin-bottom: 40px;
+  }
+  .text-input:focus { border-color: var(--orange); }
+  .text-input::placeholder { color: var(--warm-gray); font-style: italic; }
+
+  /* ---- CHECKBOX GROUP ---- */
+  .checkboxes { display: flex; flex-direction: column; gap: 10px; margin-bottom: 40px; }
+  .checkbox-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+    padding: 16px 20px;
+    border: 1px solid var(--light-gray);
+    background: white;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  .checkbox-item:hover { border-color: var(--light-gray); background: #FAFAF8; }
+  .checkbox-item.checked { border-color: var(--orange); background: #FFF8F4; }
+  .checkbox-box {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--light-gray);
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .checkbox-item.checked .checkbox-box {
+    background: var(--orange);
+    border-color: var(--orange);
+  }
+  .checkbox-box svg { display: none; }
+  .checkbox-item.checked .checkbox-box svg { display: block; }
+  .checkbox-label { font-size: 14px; line-height: 1.6; color: var(--charcoal); }
+
+  /* ---- BUTTON ---- */
+  .btn {
+    display: inline-block;
+    padding: 16px 40px;
+    background: var(--charcoal);
+    color: var(--cream);
+    font-family: 'Roboto', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    border-radius: 1px;
+    transition: all 0.25s ease;
+  }
+  .btn:hover { background: var(--orange); transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--warm-gray);
+    border: 1px solid var(--light-gray);
+    margin-right: 12px;
+  }
+  .btn-secondary:hover { background: var(--light-gray); color: var(--charcoal); transform: none; }
+
+  /* ---- DIVIDER ---- */
+  .divider {
+    width: 40px; height: 1px;
+    background: var(--orange);
+    margin: 32px 0;
+  }
+
+  /* ---- PHASE MAP ---- */
+  .phase-map { margin-bottom: 40px; }
+  .phase-item {
+    display: flex;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--light-gray);
+    align-items: flex-start;
+    opacity: 0.4;
+    transition: opacity 0.3s;
+  }
+  .phase-item.active { opacity: 1; }
+  .phase-num {
+    font-family: 'Roboto', sans-serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--orange);
+    line-height: 1;
+    min-width: 32px;
+  }
+  .phase-content {}
+  .phase-name {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--charcoal);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .phase-desc { font-size: 13px; color: var(--warm-gray); line-height: 1.7; }
+  .phase-you { font-size: 12px; color: var(--orange); margin-top: 6px; font-style: italic; }
+
+  /* ---- RESULT SCREEN ---- */
+  .result-header {
+    background: var(--charcoal);
+    margin: 0 -24px;
+    padding: 48px 48px 40px;
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .result-phase-badge {
+    display: inline-block;
+    background: var(--orange);
+    color: white;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 8px 20px;
+    border-radius: 1px;
+    margin-bottom: 20px;
+  }
+  .result-title {
+    font-family: 'Roboto', sans-serif;
+    font-size: clamp(28px, 4vw, 42px);
+    color: var(--cream);
+    font-weight: 300;
+    line-height: 1.25;
+    margin-bottom: 16px;
+  }
+  .result-title em { font-style: italic; color: var(--orange); }
+  .result-desc { font-size: 13px; color: #9A9084; line-height: 1.8; max-width: 480px; margin: 0 auto; }
+
+  .insight-card {
+    background: white;
+    border-left: 3px solid var(--orange);
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    border-radius: 0 2px 2px 0;
+  }
+  .insight-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+  .insight-text {
+    font-family: 'Roboto', sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--charcoal);
+  }
+
+  .truth-block {
+    background: var(--charcoal);
+    color: var(--cream);
+    padding: 32px 32px;
+    border-radius: 2px;
+    margin: 32px 0;
+    text-align: center;
+  }
+  .truth-block blockquote {
+    font-family: 'Roboto', sans-serif;
+    font-size: 20px;
+    font-style: italic;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--cream);
+  }
+  .truth-block cite {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--warm-gray);
+    margin-top: 16px;
+    font-style: normal;
+  }
+
+  .rules-list { list-style: none; margin: 0 0 32px; padding: 0; }
+  .rules-list li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--light-gray);
+    font-size: 14px;
+    color: var(--charcoal);
+    line-height: 1.6;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .rules-list li::before {
+    content: '—';
+    color: var(--orange);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .cta-block {
+    background: linear-gradient(135deg, var(--orange) 0%, var(--pink) 100%);
+    padding: 40px 36px;
+    border-radius: 2px;
+    text-align: center;
+    margin-top: 48px;
+  }
+  .cta-block h3 {
+    font-family: 'Roboto', sans-serif;
+    font-size: 26px;
+    color: white;
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+  .cta-block p { font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.7; margin-bottom: 24px; }
+  .btn-light {
+    background: white;
+    color: var(--charcoal);
+    border: none;
+  }
+  .btn-light:hover { background: var(--cream); transform: translateY(-1px); }
+
+  .footer-note {
+    text-align: center;
+    font-size: 11px;
+    color: var(--warm-gray);
+    padding: 32px 0 48px;
+    letter-spacing: 0.5px;
+    line-height: 1.8;
+  }
+  .footer-note a { color: var(--orange); text-decoration: none; }
+
+  /* Mobile tweaks */
+  @media (max-width: 600px) {
+    .header { padding: 40px 24px 32px; }
+    .progress-bar-wrap { padding: 0 24px 20px; }
+    .result-header { padding: 40px 24px 32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-label">Carrie Brito · Identity-Led Personal Branding</div>
+  <h1>The Identity Wobble™<br><em>Mapping Tool</em></h1>
+  <p class="header-sub">A 10-minute orientation process for navigating growth, visibility, and identity shifts — without losing yourself in them.</p>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-bar-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label" id="progressLabel">Step 1 of 6</div>
+</div>
+
+<!-- SCREENS -->
+<div class="container">
+
+  <!-- SCREEN 0: INTRO -->
+  <div class="screen active" id="screen-0">
+    <div class="section-label">Before We Begin</div>
+    <h2 class="question-title">This tool is not here to fix anything.</h2>
+    <div class="divider"></div>
+    <p class="question-sub">It's here to orient you.<br><br>
+    When you're in an identity shift — letting go of who you were, growing into who you're becoming — your mind does something predictable: it turns the discomfort into a verdict about you.<br><br>
+    Mapping the wobble interrupts that. It turns "something is wrong with me" into "ah — this is the phase I'm in."<br><br>
+    Answer honestly. There are no wrong responses. This is for you.
+    </p>
+    <button class="btn" onclick="goTo(1)">Begin the Mapping</button>
+  </div>
+
+  <!-- SCREEN 1: WHERE ARE YOU -->
+  <div class="screen" id="screen-1">
+    <div class="section-label">Section 01 — Context</div>
+    <h2 class="question-title">What's actually happening right now?</h2>
+    <p class="question-sub">Select everything that's true. (More than one is common — that's the point.)</p>
+    <div class="checkboxes" id="q1-checks">
+      <label class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">I'm letting go of a role, identity, or way of working that used to define me</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">I'm being seen in a new way — speaking, teaching, leading — and it feels uncomfortable</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">I can't tell if things are "working" because the old metrics no longer apply</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">I feel a strong pull to retreat to what I know — even if I know it's not the direction</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">I've recently stepped into something new and my confidence dropped instead of rose</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">I'm questioning whether I'm qualified, prepared, or "real enough" for what I'm building</span>
+      </label>
+    </div>
+    <div style="display:flex; gap:0;">
+      <button class="btn btn-secondary" onclick="goTo(0)">Back</button>
+      <button class="btn" onclick="goTo(2)">Continue</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: WOBBLE VOICE -->
+  <div class="screen" id="screen-2">
+    <div class="section-label">Section 02 — Your Wobble Voice</div>
+    <h2 class="question-title">What does your wobble sound like?</h2>
+    <p class="question-sub">Select the thoughts that feel most familiar — the ones that have been loudest lately.</p>
+    <div class="checkboxes" id="q2-checks">
+      <label class="checkbox-item" onclick="toggleCheck(this)" data-type="legitimacy">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">"What if I'm making this up?"</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)" data-type="legitimacy">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">"Who am I to teach or lead this?"</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)" data-type="retreat">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">"I should probably go back to what I know works."</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)" data-type="exposure">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">"People will see through me."</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)" data-type="meaning">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">"This doesn't feel like it's working."</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)" data-type="legitimacy">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">"Maybe I overestimated myself."</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)" data-type="retreat">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">"I need more preparation, more proof, more before I'm ready."</span>
+      </label>
+    </div>
+    <div style="display:flex; gap:0;">
+      <button class="btn btn-secondary" onclick="goTo(1)">Back</button>
+      <button class="btn" onclick="goTo(3)">Continue</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: ESCAPE ROUTES -->
+  <div class="screen" id="screen-3">
+    <div class="section-label">Section 03 — Your Escape Routes</div>
+    <h2 class="question-title">When the wobble peaks, what do you reach for?</h2>
+    <p class="question-sub">These are not bad habits. They're familiar safety behaviors. Naming them means you don't act on them unconsciously.</p>
+    <div class="checkboxes" id="q3-checks">
+      <label class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">Returning to old work I know I'm "good at," even when it's not the direction</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">Over-explaining myself or my value to people who didn't ask</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">Seeking external validation (checking reactions, looking for signs it "landed")</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">Shrinking ideas before they're fully formed so they feel "safer" to share</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">Questioning whether my frameworks are "real" or researched enough</span>
+      </label>
+      <label class="checkbox-item" onclick="toggleCheck(this)">
+        <div class="checkbox-box"><svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="checkbox-label">Filling time with busyness rather than sitting with the discomfort</span>
+      </label>
+    </div>
+    <div style="display:flex; gap:0;">
+      <button class="btn btn-secondary" onclick="goTo(2)">Back</button>
+      <button class="btn" onclick="goTo(4)">Continue</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: WHAT'S STILL TRUE -->
+  <div class="screen" id="screen-4">
+    <div class="section-label">Section 04 — Grounding</div>
+    <h2 class="question-title">Write one thing you still know to be true about your work — even if you can't feel it right now.</h2>
+    <p class="question-sub">Don't try to make it impressive. Just notice what's still there beneath the noise.</p>
+    <textarea class="text-input" id="truth-input" placeholder="I know that..." rows="5"></textarea>
+    <div style="display:flex; gap:0;">
+      <button class="btn btn-secondary" onclick="goTo(3)">Back</button>
+      <button class="btn" onclick="goTo(5)">Continue</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 5: PHASE SELECT -->
+  <div class="screen" id="screen-5">
+    <div class="section-label">Section 05 — Locate Yourself</div>
+    <h2 class="question-title">Which phase feels most like where you are right now?</h2>
+    <p class="question-sub">Every wobble moves through five phases. You might feel elements of more than one — pick the one that feels closest.</p>
+    <div class="options" id="phase-options">
+      <div class="option" onclick="selectPhase(this, 1)">
+        <span class="option-letter">Phase 01</span>
+        <div class="option-text"><strong>Letting Go</strong> — I'm releasing an old identity, role, or way of proving my value. It hasn't fully landed yet. I feel the loss more than the gain.</div>
+      </div>
+      <div class="option" onclick="selectPhase(this, 2)">
+        <span class="option-letter">Phase 02</span>
+        <div class="option-text"><strong>Exposure</strong> — I'm being seen differently. Less execution, more presence. The imposter thoughts are loudest here.</div>
+      </div>
+      <div class="option" onclick="selectPhase(this, 3)">
+        <span class="option-letter">Phase 03</span>
+        <div class="option-text"><strong>Meaning Collapse</strong> — Nothing feels like it's working because I don't know what "working" looks like in this new version of me.</div>
+      </div>
+      <div class="option" onclick="selectPhase(this, 4)">
+        <span class="option-letter">Phase 04</span>
+        <div class="option-text"><strong>Nervous System Alarm</strong> — The pull to retreat feels most rational right now. I'm tempted to go back to what's familiar.</div>
+      </div>
+      <div class="option" onclick="selectPhase(this, 5)">
+        <span class="option-letter">Phase 05</span>
+        <div class="option-text"><strong>Integration</strong> — Something has quietly shifted. I feel steadier, less dependent on external proof. The work is starting to feel like mine.</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:0;">
+      <button class="btn btn-secondary" onclick="goTo(4)">Back</button>
+      <button class="btn" onclick="generateResult()">See My Map</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 6: RESULT -->
+  <div class="screen" id="screen-6">
+    <div class="result-header">
+      <div class="result-phase-badge" id="result-badge">Phase 03</div>
+      <h2 class="result-title" id="result-title">You are in<br><em>Meaning Collapse</em></h2>
+      <p class="result-desc" id="result-desc">This is where old metrics no longer apply and new ones haven't arrived yet.</p>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-label">What This Phase Means</div>
+      <div class="insight-text" id="insight-text">Loading...</div>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-label">What Your Wobble Is Protecting</div>
+      <div class="insight-text" id="protecting-text">Loading...</div>
+    </div>
+
+    <div class="truth-block" id="truth-display" style="display:none;">
+      <blockquote id="truth-quote"></blockquote>
+      <cite>What you wrote — still true</cite>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-label">Your Containment Rules</div>
+    <h3 style="font-family:'Roboto',sans-serif; font-size:22px; font-weight:400; margin-bottom:16px; color:var(--charcoal);">While you're here, you do not:</h3>
+    <ul class="rules-list">
+      <li>Decide whether your work "works" or has value</li>
+      <li>Assume impact equals immediate applause or measurable proof</li>
+      <li>Abandon a direction because the nervous system is uncomfortable</li>
+      <li>Rewrite your story from inside the fear</li>
+      <li>Seek certainty from people who didn't witness the full picture</li>
+      <li>Make permanent decisions from temporary feelings</li>
+    </ul>
+
+    <div class="truth-block">
+      <blockquote>"This is the phase where my old proof no longer applies and my new proof hasn't stabilized yet."</blockquote>
+      <cite>The reframe that stops personalization — Identity Wobble™ Framework</cite>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-label">What Comes Next</div>
+    <div class="phase-map" id="phase-map-result">
+      <div class="phase-item" data-phase="1">
+        <div class="phase-num">1</div>
+        <div class="phase-content">
+          <div class="phase-name">Letting Go</div>
+          <div class="phase-desc">Old proof of worth dissolves. You feel the loss before the gain.</div>
+        </div>
+      </div>
+      <div class="phase-item" data-phase="2">
+        <div class="phase-num">2</div>
+        <div class="phase-content">
+          <div class="phase-name">Exposure</div>
+          <div class="phase-desc">Being seen differently. Less execution, more presence. Imposter thoughts peak.</div>
+        </div>
+      </div>
+      <div class="phase-item" data-phase="3">
+        <div class="phase-num">3</div>
+        <div class="phase-content">
+          <div class="phase-name">Meaning Collapse</div>
+          <div class="phase-desc">Old metrics gone. New metrics not formed yet. Nothing feels like it's "working."</div>
+        </div>
+      </div>
+      <div class="phase-item" data-phase="4">
+        <div class="phase-num">4</div>
+        <div class="phase-content">
+          <div class="phase-name">Nervous System Alarm</div>
+          <div class="phase-desc">Retreat feels rational. The pull toward familiar paths is strongest here.</div>
+        </div>
+      </div>
+      <div class="phase-item" data-phase="5">
+        <div class="phase-num">5</div>
+        <div class="phase-content">
+          <div class="phase-name">Integration</div>
+          <div class="phase-desc">Quiet confidence returns. Less explaining. More trust. The work feels like yours.</div>
+          <div class="phase-you">— This is where you're headed.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-block">
+      <h3>Ready to go deeper?</h3>
+      <p>The Identity Wobble™ is core to the work I do with coaches, entrepreneurs, and leaders navigating identity-level growth. If this mapped something real for you, let's continue the conversation.</p>
+      <button class="btn btn-light" onclick="window.open('https://carriebrito.com','_blank')">Work With Carrie</button>
+    </div>
+
+    <div class="footer-note">
+      This tool was created by <a href="https://carriebrito.com">Carrie Brito</a>, Identity-Led Personal Brand Strategist.<br>
+      The Identity Wobble™ is proprietary IP. All rights reserved.
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  let currentScreen = 0;
+  let selectedPhase = 0;
+  const totalScreens = 6;
+
+  const phaseData = {
+    1: {
+      badge: 'Phase 01 — Letting Go',
+      title: 'You are in\nLetting Go',
+      titleEm: 'Letting Go',
+      desc: 'The old proof of your value is dissolving. This is not the end — it\'s the beginning of the shift.',
+      insight: 'You are releasing an identity that used to anchor you. This is grief before gain. The disorientation you feel is not evidence of a mistake — it\'s what transition actually feels like at the cellular level. Most people mistake this stage for failure. It isn\'t. It\'s departure.',
+      protecting: 'Your wobble is protecting you from the exposure of being seen without the armor your old identity provided. Letting go means being visible without a familiar credential. That is genuinely uncomfortable. It is also the only path forward.'
+    },
+    2: {
+      badge: 'Phase 02 — Exposure',
+      title: 'You are in\nExposure',
+      titleEm: 'Exposure',
+      desc: 'You are being seen in a new way — and your nervous system is treating visibility like danger.',
+      insight: 'In this phase, you are less execution and more presence. Less deliverables and more depth. The imposter thoughts are loudest here because you have stopped hiding behind output. That feels vulnerable. But here is what is also true: when you speak from your edge, it often feels flat inside you because you weren\'t performing. That\'s not failure. That\'s authenticity.',
+      protecting: 'Your wobble is protecting you from being seen without immediate proof of impact. You are used to knowing whether something "worked." Identity work doesn\'t give you that certainty. And that ambiguity is its own kind of exposure.'
+    },
+    3: {
+      badge: 'Phase 03 — Meaning Collapse',
+      title: 'You are in\nMeaning Collapse',
+      titleEm: 'Meaning Collapse',
+      desc: 'Old metrics no longer apply. New ones haven\'t formed yet. The silence feels like absence of value — it isn\'t.',
+      insight: 'This is where most people abandon the path. Not because they were wrong. Because they don\'t have language for what\'s happening. Meaning collapse is temporary — but it feels permanent from inside it. The emptiness you sense is not absence of value. It\'s absence of noise. Your old feedback loops are gone. New ones are forming.',
+      protecting: 'Your wobble is protecting you from trusting impact you cannot yet measure. This is the hardest phase because the nervous system equates "no clear signal" with "no progress." The truth: the work is integrating. Quietly. Underneath the doubt.'
+    },
+    4: {
+      badge: 'Phase 04 — Nervous System Alarm',
+      title: 'You are in\nNervous System Alarm',
+      titleEm: 'Nervous System Alarm',
+      desc: 'Retreat feels rational right now. The pull toward the familiar is strongest at this phase — and it is not a sign to go back.',
+      insight: 'Your nervous system is doing its job: trying to restore a feeling of safety. It will offer you very compelling arguments for returning to what you know. Those arguments will sound intelligent. They will reference real evidence. Do not make permanent decisions from this temporary state.',
+      protecting: 'Your wobble is protecting you from the discomfort of leading without a net. The familiar work gave you certainty. This new direction requires trust — in your own voice, your own thinking, your own evolving authority. That trust is built in this phase, not before it.'
+    },
+    5: {
+      badge: 'Phase 05 — Integration',
+      title: 'You are entering\nIntegration',
+      titleEm: 'Integration',
+      desc: 'The crossing is not over — but something has shifted. Quietly. Steadily.',
+      insight: 'Integration does not arrive with fanfare. It arrives as a quiet confidence. A felt sense of "oh — this is the work." You explain less. You trust more. You stop asking whether you are ready and start noticing that you already are. This is not the end of the wobble — it will return briefly with each new level. But now you have a map.',
+      protecting: 'Even in integration, your wobble may still whisper. It\'s protecting old patterns from fully releasing. The practice now is to notice the thought, name the phase, and return to what you know is true — not what fear has to say about it.'
+    }
+  };
+
+  function goTo(n) {
+    document.getElementById(`screen-${currentScreen}`).classList.remove('active');
+    currentScreen = n;
+    document.getElementById(`screen-${currentScreen}`).classList.add('active');
+    updateProgress(n);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress(n) {
+    const pct = n === 0 ? 0 : Math.round((n / totalScreens) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = n === 0 ? 'Begin' : `Step ${n} of ${totalScreens}`;
+  }
+
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+  }
+
+  function selectPhase(el, num) {
+    document.querySelectorAll('#phase-options .option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedPhase = num;
+  }
+
+  function generateResult() {
+    if (!selectedPhase) { alert('Please select a phase to continue.'); return; }
+    const data = phaseData[selectedPhase];
+    document.getElementById('result-badge').textContent = data.badge;
+    const titleLines = data.title.split('\n');
+    document.getElementById('result-title').innerHTML = `${titleLines[0]}<br><em>${data.titleEm}</em>`;
+    document.getElementById('result-desc').textContent = data.desc;
+    document.getElementById('insight-text').textContent = data.insight;
+    document.getElementById('protecting-text').textContent = data.protecting;
+
+    const truthVal = document.getElementById('truth-input').value.trim();
+    if (truthVal) {
+      document.getElementById('truth-quote').textContent = truthVal;
+      document.getElementById('truth-display').style.display = 'block';
+    }
+
+    // Highlight phase map
+    document.querySelectorAll('#phase-map-result .phase-item').forEach(item => {
+      const p = parseInt(item.getAttribute('data-phase'));
+      item.classList.toggle('active', p <= selectedPhase + 1);
+    });
+
+    goTo(6);
+  }
+</script>
+</body>
+</html>

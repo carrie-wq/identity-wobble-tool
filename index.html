@@ -771,7 +771,16 @@
     currentScreen = n;
     document.getElementById(`screen-${currentScreen}`).classList.add('active');
     updateProgress(n);
+    // Scroll the tool itself to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+    document.body.scrollTo({ top: 0, behavior: 'smooth' });
+    // Tell the parent Squarespace page to scroll to the top of the iframe
+    try {
+      window.parent.postMessage({ type: 'scrollToTop' }, '*');
+    } catch(e) {}
+    // Report new height to parent so iframe resizes
+    setTimeout(reportHeight, 100);
   }
 
   function updateProgress(n) {
@@ -788,6 +797,13 @@
     document.querySelectorAll('#phase-options .option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
     selectedPhase = num;
+  }
+
+  function reportHeight() {
+    try {
+      var height = document.body.scrollHeight;
+      window.parent.postMessage({ type: 'resize', height: height }, '*');
+    } catch(e) {}
   }
 
   function generateResult() {
@@ -813,7 +829,14 @@
     });
 
     goTo(6);
+    // Results screen is taller — give it time to render then report height
+    setTimeout(reportHeight, 200);
   }
+
+  // Report height on initial load
+  window.addEventListener('load', function() {
+    setTimeout(reportHeight, 150);
+  });
 </script>
 </body>
 </html>
